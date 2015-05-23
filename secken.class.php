@@ -78,7 +78,7 @@ class secken {
      * qrcode_url   二维码地址
      * uuid         事件id
      */ 
-    public function qrcode_for_binding() {
+    public function getBinding() {
         $data   = array(
             'app_id'    => $this->app_id,
             'signature' => md5('app_id=' . $this->app_id . $this->app_key)
@@ -98,7 +98,7 @@ class secken {
      * url       二维码地址
      * uuid      事件id
      */
-    public function qrcode_for_auth() {
+    public function getAuth() {
         $data   = array(
             'app_id'    => $this->app_id,
             'signature' => md5('app_id=' . $this->app_id . $this->app_key)
@@ -119,7 +119,7 @@ class secken {
      * userid  用户ID
      * signature 签名 [MD5(userid=$useridappkey)]
      */
-    public function event_result($event_id) {
+    public function getResult($event_id) {
         $data   = array(
             'app_id'    => $this->app_id,
             'event_id'  => $event_id,
@@ -143,7 +143,7 @@ class secken {
      * message  错误信息
      * event_id 事件id
      */
-    public function realtime_auth($action_type = 'login', $uid, $user_ip = '', $username = '') {
+    public function realtimeAuth($action_type = 'login', $uid, $user_ip = '', $username = '') {
         $data   = array(
             'action_type'   => $action_type,
             'app_id'        => $this->app_id,
@@ -168,7 +168,7 @@ class secken {
      * code    成功、错误码
      * message 错误信息
      */
-    public function offline_auth($uid, $dynamic_code) {
+    public function offlineAuth($uid, $dynamic_code) {
         $data   = array(
             'appid'         => $this->app_id,
             'uid'           => $uid,
@@ -188,7 +188,7 @@ class secken {
      * @param string $callback 回调登陆地址
      * @return string 授权页url
      */
-    public function auth_page($callback) {
+    public function getAuthPage($callback) {
         $_time  = time();
         $data   = array(
             'auth_id'       => $this->auth_id,

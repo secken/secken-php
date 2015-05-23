@@ -10,7 +10,7 @@
     $secken_api = new secken($app_id,$app_key,$auth_id);
 
     # Step 1 - Get an qrcode for binding 
-    $ret  = $secken_api->qrcode_for_binding();
+    $ret  = $secken_api->getBinding();
 
     //$ret = $secken_api->offline_auth('2121','sd');
 
