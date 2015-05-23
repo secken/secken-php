@@ -1,19 +1,17 @@
 # Secken API Library for PHP
-------
+
 A php library for using the Secken API.
 
 
-##Prerequisites
-------
+## Prerequisites
+
  * PHP 5.3 or above
  * Secken Account and An application
  
  Download [here](https://www.secken.com/download) secken client, create account, and log in secken Dashboard.    
  A new application can be created in secken Dashboard, you can get appid、 appkey,、authid
 
-##Overview
-------
-
+## Overview
 
 Secken provides a simple and safe authentication service, other applications can be integrated by using API development libraries, to protect the security of the user account quickly.
 
@@ -23,9 +21,8 @@ Developer documentation for using the Secken API can be found [here](https://www
 
 
 
-##How To Use
------
-###Initialize 
+## How To Use
+### Initialize 
 
 	include_once 'secken.class.php';
 
@@ -34,12 +31,12 @@ Developer documentation for using the Secken API can be found [here](https://www
     $auth_id    = 'auth_id';
 
 
-###Creating a instance
+### Creating a instance
 
 	$secken_api = new secken($app_id,$app_key,$auth_id);
 
-###Request a QRCode for Binding
--------
+### Request a QRCode for Binding
+
 If the request is successful, will return the qrcode url,
 and a single event_id correspond to the qrcode,the event_id will use in the getResult interface.
 
@@ -54,8 +51,8 @@ and a single event_id correspond to the qrcode,the event_id will use in the getR
     }
 
 
-###Request a QRCode for Auth
--------
+### Request a QRCode for Auth
+
 If the request is successful, will return the qrcode url,
 and a single event_id correspond to the qrcode,the event_id will use in the getResult interface.
 
@@ -68,7 +65,7 @@ and a single event_id correspond to the qrcode,the event_id will use in the getR
         var_dump($ret);
     }
 
-###Request a user online authentication
+### Request a user online authentication
 
     $ret  = $secken_api->realtimeAuth($action_type,$uid);
     
@@ -79,7 +76,7 @@ and a single event_id correspond to the qrcode,the event_id will use in the getR
         var_dump($ret);
     }
 
-###Request a user offline authentication
+### Request a user offline authentication
 
     $ret  = $secken_api->offlineAuth($uid,$dynamic_code);
 
@@ -91,7 +88,7 @@ and a single event_id correspond to the qrcode,the event_id will use in the getR
     }
     
     
-###Get event results
+### Get event results
 
     $ret  = $secken_api->getResult($event_id);
 
@@ -102,8 +99,8 @@ and a single event_id correspond to the qrcode,the event_id will use in the getR
         var_dump($ret);
     }
 
-##Contact
------
+## Contact
+
 web：[www.secken.com](https://www.secken.com)    
 
 Email: [support@secken.com](mailto:support@secken.com)
