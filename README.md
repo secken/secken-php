@@ -26,7 +26,7 @@ Developer documentation for using the Secken API can be found [here](https://www
 
 	include_once 'secken.class.php';
 
-    $app_id     = '1234';
+    $app_id     = 'app_id';
     $app_key    = 'app_key';
     $auth_id    = 'auth_id';
 
