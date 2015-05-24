@@ -13,11 +13,11 @@ A php library for using the Secken API.
 
 ## Overview
 
-Secken provides a simple and safe authentication service, other applications can be integrated by using API development libraries, to protect the security of the user account quickly.
+Secken provides a simple and secure authentication service. Secken APIs can be integrated by any application to enforce the security of user accounts. 
 
-The PHP library for developers to quickly integrate secken, which does not need direct interact with the platform API.
+The PHP library is an easy-to-use tool, which allows the developers to access Secken more effectively.
 
-Developer documentation for using the Secken API can be found [here](https://www.secken.com/api/).
+For more detailed information, you can find [here](https://www.secken.com/api/).
 
 
 
@@ -67,6 +67,8 @@ and a single event_id correspond to the qrcode,the event_id will use in the getR
 
 ### Request a user online authentication
 
+When calling this method, the server will push a verifying request to client’s mobile device, the client can select allowing or refusing this operation.
+
     $ret  = $secken_api->realtimeAuth($action_type,$uid);
     
     if ( $secken_api->getCode() != 200 ){
@@ -77,6 +79,8 @@ and a single event_id correspond to the qrcode,the event_id will use in the getR
     }
 
 ### Request a user offline authentication
+
+When there is no Internet connection, the clients are allowed to do offline verification. The 6-digit code is indicated on secken app.
 
     $ret  = $secken_api->offlineAuth($uid,$dynamic_code);
 
@@ -90,6 +94,9 @@ and a single event_id correspond to the qrcode,the event_id will use in the getR
     
 ### Get event results
 
+Once the methods like getBinding(), getAuth() and realtimeAuth() are called successfully, it triggers a special event, which is identified by a unique event_id. 
+
+
     $ret  = $secken_api->getResult($event_id);
 
     if ( $secken_api->getCode() != 200 ){
@@ -98,6 +105,21 @@ and a single event_id correspond to the qrcode,the event_id will use in the getR
     } else {
         var_dump($ret);
     }
+    
+Regarding the event_id, this method returns a status code and informs those methods which value should be returned. A list of status code is described below:
+
+* 200 ok
+getBinding() and getAuth() return a value called uid. realtimeAuth() returns True, which represents the uid has been verified.
+
+* 602 re-inquiry
+The event is still in period of validity. This method requests event_id repeatedly.
+
+* 603 invalid
+The event is out of date. This method cancels requesting event_id.   
+
+    
+##Error code
+ 
 
 ## Contact
 
