@@ -117,9 +117,46 @@ The event is still in period of validity. This method requests event_id repeated
 * 603 invalid
 The event is out of date. This method cancels requesting event_id.   
 
+###Get authPage
+
+When there is no Internet connection or secken app fails scanning the code, the app can call this API to do offline verification. After offline verification works successfully, the app calls callback function and returns to the previous website. In the mean time, the signature should be verified to avoid malicious deception.
+
+
+    $ret  = $secken_api->getAuthPage($callback);
+
+    if ( $secken_api->getCode() != 200 ){
+        var_dump($secken_api->getCode(), $secken_api->getMessage());
+
+    } else {
+        var_dump($ret);
+    }
     
 ##Error code
  
+#####Success 
+
+* 200 - ok
+
+#####Client Error
+
+* 400 - requested parameter format not satisfiable
+* 401 - 6-digit code timeout
+* 402 - app_id error
+* 403 - requested signature error
+* 404 - requested API not exist
+* 405 - requested method error
+* 406 - not in application whitelists
+* 407 - Too many requests in 30s, please reload offline authentication page
+
+#####Server Error
+
+* 500 - service unavailable
+* 501 - failed generating QR code
+* 600 - 6-digit code verified error
+* 601 - refuse authorization
+* 602 - wait for user's response, please try again
+* 603 - response timeout, refuse to try again
+* 604 - user not exist
 
 ## Contact
 
