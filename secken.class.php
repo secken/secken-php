@@ -126,7 +126,7 @@ class secken {
             'signature' => md5('app_id=' . $this->app_id . 'event_id=' . $event_id. $this->app_key)
         );
 
-        $url    = $this->gen_get_url($self::EVENT_RESULT, $data);
+        $url    = $this->gen_get_url(self::EVENT_RESULT, $data);
         $ret    = $this->request($url);
 
         return $this->prettyRet($ret);
