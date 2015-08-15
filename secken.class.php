@@ -34,7 +34,7 @@ class secken {
 
     //洋葱离线授权验证
     const OFFLINE_AUTH          = 'offline_authorization';
-    
+
     //获取洋葱授权网页
     const AUTH_PAGE             = 'https://auth.yangcong.com/v2/auth_page';
 
@@ -77,12 +77,16 @@ class secken {
      * message      错误信息
      * qrcode_url   二维码地址
      * uuid         事件id
-     */ 
-    public function getBinding() {
+     */
+    public function getBinding($auth_type = null, $callback = '') {
         $data   = array(
-            'app_id'    => $this->app_id,
-            'signature' => md5('app_id=' . $this->app_id . $this->app_key)
+            'app_id'    => $this->app_id
         );
+
+        if( $auth_type ) $data['auth_type'] = $auth_type;
+        if( $callback ) $data['callback'] = urlencode($callback);
+
+        $data['signature'] = $this->getSignature($data);
 
         $url    = $this->gen_get_url(self::QRCODE_FOR_BINDING, $data);
         $ret    = $this->request($url);
@@ -98,11 +102,15 @@ class secken {
      * url       二维码地址
      * uuid      事件id
      */
-    public function getAuth() {
+    public function getAuth($auth_type = null, $callback = '') {
         $data   = array(
-            'app_id'    => $this->app_id,
-            'signature' => md5('app_id=' . $this->app_id . $this->app_key)
+            'app_id'    => $this->app_id
         );
+
+        if( $auth_type ) $data['auth_type'] = $auth_type;
+        if( $callback ) $data['callback'] = urlencode($callback);
+
+        $data['signature'] = $this->getSignature($data);
 
         $url    = $this->gen_get_url(self::QRCODE_FOR_AUTH, $data);
         $ret    = $this->request($url);
@@ -122,9 +130,10 @@ class secken {
     public function getResult($event_id) {
         $data   = array(
             'app_id'    => $this->app_id,
-            'event_id'  => $event_id,
-            'signature' => md5('app_id=' . $this->app_id . 'event_id=' . $event_id. $this->app_key)
+            'event_id'  => $event_id
         );
+
+        $data['signature'] = $this->getSignature($data);
 
         $url    = $this->gen_get_url(self::EVENT_RESULT, $data);
         $ret    = $this->request($url);
@@ -143,15 +152,18 @@ class secken {
      * message  错误信息
      * event_id 事件id
      */
-    public function realtimeAuth($action_type = 'login', $uid, $user_ip = '', $username = '') {
+    public function realtimeAuth($uid, $action_type = 1, $auth_type=1, $callback='', $user_ip = '', $username = '') {
         $data   = array(
             'action_type'   => $action_type,
             'app_id'        => $this->app_id,
-            'uid'           => $uid,
-            'user_ip'       => $user_ip, 
-            'username'      => $username,
-            'signature'     => md5('action_type=' . $action_type . 'appid=' . $this->app_id . 'uid=' . $uid . $this->app_key),
+            'uid'           => $uid
         );
+
+        if ( $callback ) $data['callback'] = urlencode($callback);
+        if ( $user_ip )  $data['user_ip']  = $user_ip;
+        if ( $username ) $data['username'] = urlencode($username);
+
+        $data['signature'] = $this->getSignature($data);
 
         $url    = self::BASE_URL . self::REALTIME_AUTH;
 
@@ -172,9 +184,10 @@ class secken {
         $data   = array(
             'appid'         => $this->app_id,
             'uid'           => $uid,
-            'dynamic_code'  => $dynamic_code,
-            'signature'     => md5('appid=' . $this->app_id . 'dynamic_code=' . $dynamic_code. 'uid=' . $uid . $this->app_key),
+            'dynamic_code'  => $dynamic_code
         );
+
+        $data['signature'] = $this->getSignature($data);
 
         $url    = self::BASE_URL . self::OFFLINE_AUTH;
 
@@ -193,9 +206,10 @@ class secken {
         $data   = array(
             'auth_id'       => $this->auth_id,
             'timestamp'     => $_time,
-            'callback'      => $callback,
-            'signature'     => md5('appid=' . $this->app_id . 'callback=' . $callback. 'timestamp=' . $_time. $this->app_key),
+            'callback'      => urlencode($callback)
         );
+
+        $data['signature'] = $this->getSignature($data);
 
         unset($_time);
 
@@ -203,6 +217,22 @@ class secken {
         $ret    = $this->request($url);
 
         return $this->prettyRet($ret);
+    }
+
+    /**
+     * 生成签名
+     * @param array $params 要签名的参数
+     * @return string 签名的MD5串
+     */
+    public function getSignature($params) {
+        ksort($params);
+        $str = '';
+
+        foreach ( $params as $key => $value ) {
+            $str .= "$key=$value";
+        }
+
+        return md5($str . $this->app_key);
     }
 
     /**

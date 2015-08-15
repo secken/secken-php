@@ -2,15 +2,17 @@
 
     include_once 'secken.class.php';
 
-    $app_id     = '1234';
+    $app_id     = 'app_id';
     $app_key    = 'app_key';
     $auth_id    = 'auth_id';
 
     // Create an API object using your credentials
     $secken_api = new secken($app_id,$app_key,$auth_id);
 
-    # Step 1 - Get an qrcode for binding 
-    $ret  = $secken_api->getBinding();
+    # Step 1 - Get an qrcode for binding
+    $ret  = $secken_api->getAuth(1, "https://callback.com/path");
+
+    //$ret = $secken_api->realtimeAuth('uid', 1, 1, 'https://callback.com/path', '123.123.123.123', '名字');
 
     //$ret = $secken_api->offline_auth('2121','sd');
 
