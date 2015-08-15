@@ -7,13 +7,13 @@ A php library for using the Secken API.
 
  * PHP 5.3 or above
  * Secken Account and An application
- 
- Download [here](https://www.secken.com/download) secken client, create account, and log in secken Dashboard.    
+
+ Download [here](https://www.secken.com/download) secken client, create account, and log in secken Dashboard.
  A new application can be created in secken Dashboard, you can get appid、 appkey,、authid
 
 ## Overview
 
-Secken provides a simple and secure authentication service. Secken APIs can be integrated by any application to enforce the security of user accounts. 
+Secken provides a simple and secure authentication service. Secken APIs can be integrated by any application to enforce the security of user accounts.
 
 The PHP library is an easy-to-use tool, which allows the developers to access Secken more effectively.
 
@@ -22,7 +22,7 @@ For more detailed information, you can find [here](https://www.secken.com/api/).
 
 
 ## How To Use
-### Initialize 
+### Initialize
 
 	include_once 'secken.class.php';
 
@@ -69,8 +69,8 @@ and a single event_id correspond to the qrcode,the event_id will use in the getR
 
 When calling this method, the server will push a verifying request to client’s mobile device, the client can select allowing or refusing this operation.
 
-    $ret  = $secken_api->realtimeAuth($action_type,$uid);
-    
+    $ret  = $secken_api->realtimeAuth($uid);
+
     if ( $secken_api->getCode() != 200 ){
         var_dump($secken_api->getCode(), $secken_api->getMessage());
 
@@ -90,11 +90,11 @@ When there is no Internet connection, the clients are allowed to do offline veri
     } else {
         var_dump($ret);
     }
-    
-    
+
+
 ### Get event results
 
-Once the methods like getBinding(), getAuth() and realtimeAuth() are called successfully, it triggers a special event, which is identified by a unique event_id. 
+Once the methods like getBinding(), getAuth() and realtimeAuth() are called successfully, it triggers a special event, which is identified by a unique event_id.
 
 
     $ret  = $secken_api->getResult($event_id);
@@ -105,7 +105,7 @@ Once the methods like getBinding(), getAuth() and realtimeAuth() are called succ
     } else {
         var_dump($ret);
     }
-    
+
 Regarding the event_id, this method returns a status code and informs those methods which value should be returned. A list of status code is described below:
 
 * 200 ok
@@ -115,7 +115,7 @@ getBinding() and getAuth() return a value called uid. realtimeAuth() returns Tru
 The event is still in period of validity. This method requests event_id repeatedly.
 
 * 603 invalid
-The event is out of date. This method cancels requesting event_id.   
+The event is out of date. This method cancels requesting event_id.
 
 ###Get authPage
 
@@ -130,10 +130,10 @@ When there is no Internet connection or secken app fails scanning the code, the 
     } else {
         var_dump($ret);
     }
-    
+
 ##Error code
- 
-#####Success 
+
+#####Success
 
 * 200 - ok
 
@@ -160,6 +160,6 @@ When there is no Internet connection or secken app fails scanning the code, the 
 
 ## Contact
 
-web：[www.secken.com](https://www.secken.com)    
+web：[www.secken.com](https://www.secken.com)
 
 Email: [support@secken.com](mailto:support@secken.com)
