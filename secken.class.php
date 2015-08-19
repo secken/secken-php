@@ -301,6 +301,7 @@ class secken {
         curl_setopt($ci, CURLOPT_HEADER, FALSE);
         curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ci, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, false); 
 
         if ( $method == 'POST' ) {
             curl_setopt($ci, CURLOPT_POST, TRUE);
