@@ -9,6 +9,7 @@
  **/
 
 class secken {
+
     //应用id
     private $app_id = '';
 
@@ -18,6 +19,7 @@ class secken {
     //web授权code
     private $auth_id = '';
 
+    //api请求地址
     const BASE_URL              = 'https://api.yangcong.com/v2/';
 
     //获取可绑定洋葱客户的二维码
@@ -45,10 +47,10 @@ class secken {
     private $errorCode = array(
         200 => '请求成功',
         400 => '请求参数格式错误',
-        401 => '动态码过期',
+        401 => 'app 状态错误',
         402 => 'app_id错误',
         403 => '请求签名错误',
-        404 => '请你API不存在',
+        404 => '请求API不存在',
         405 => '请求方法错误',
         406 => '不在应用白名单里',
         407 => '30s离线验证太多次，请重新打开离线验证页面',
@@ -58,11 +60,12 @@ class secken {
         601 => '用户拒绝授权',
         602 => '等待用户响应超时，可重试',
         603 => '等待用户响应超时，不可重试',
-        604 => '用户不存在'
+        604 => '用户或event_id不存在',
+        605 => '用户未开启该验证类型'
     );
 
     /**
-     * construct secken object
+     * 初始化
      */
     public function __construct($app_id, $app_key, $auth_id) {
         $this->app_id   = $app_id;
@@ -72,18 +75,24 @@ class secken {
 
     /**
      * 获取绑定二维码
+     * @param
+     * auth_type    Int    验证类型(可选)（1: 点击确认按钮,默认 2: 使用手势密码 3: 人脸验证 4: 声音验证）
+     * callback     String 回调地址（可选）
      * @return array
-     * code         成功、错误码
-     * message      错误信息
-     * qrcode_url   二维码地址
-     * uuid         事件id
+     * status       Int     状态码
+     * description  String  状态码对应描述信息
+     * qrcode_url   String  二维码地址
+     * qrcode_data  String  二维码图片的字符串内容
+     * event_id     String  事件ID,可调用event_result API来获取扫描结果,如果设置了callback，则无法获取扫描结果
+     * signature    String  签名，可保证数据完整性
      */
     public function getBinding($auth_type = null, $callback = '') {
-        $data   = array(
+        $data  = array();
+        $data  = array(
             'app_id'    => $this->app_id
         );
 
-        if( $auth_type ) $data['auth_type'] = $auth_type;
+        if( $auth_type ) $data['auth_type'] = intval($auth_type);
         if( $callback ) $data['callback'] = urlencode($callback);
 
         $data['signature'] = $this->getSignature($data);
@@ -96,18 +105,24 @@ class secken {
 
     /**
      * 获取登录二维码
+     * @param
+     * auth_type Int    验证类型(可选)（1: 点击确认按钮,默认 2: 使用手势密码 3: 人脸验证 4: 声音验证）
+     * callback  String 回调地址(可选)
      * @return array
-     * code      成功、错误码
-     * message   错误信息
-     * url       二维码地址
-     * uuid      事件id
+     * status       Int     状态码
+     * description  String  状态码对应描述信息
+     * qrcode_url   String  二维码地址
+     * qrcode_data  String  二维码图片的字符串内容
+     * event_id     String  事件ID,可调用event_result API来获取扫描结果,如果设置了callback，则无法获取扫描结果
+     * signature    String  签名，可保证数据完整性
      */
     public function getAuth($auth_type = null, $callback = '') {
+        $data   = array();
         $data   = array(
             'app_id'    => $this->app_id
         );
 
-        if( $auth_type ) $data['auth_type'] = $auth_type;
+        if( $auth_type ) $data['auth_type'] = intval($auth_type);
         if( $callback ) $data['callback'] = urlencode($callback);
 
         $data['signature'] = $this->getSignature($data);
@@ -120,14 +135,18 @@ class secken {
 
     /**
      * 查询UUID事件结果
-     * @param string $event_id 事件id
+     * @param
+     * event_id     String   事件id
+     * signature    String   签名，用于确保客户端提交数据的完整性
      * @return array
-     * code    成功、错误码
-     * message 错误信息
-     * userid  用户ID
-     * signature 签名 [MD5(userid=$useridappkey)]
+     * status       Int     状态码
+     * description  String  状态码对应描述信息
+     * event_id     String  事件ID,可调用event_result API来获取扫描结果,如果设置了callback，则无法获取扫描结果
+     * uid          String  用户在洋葱上对应ID
+     * signature    String  签名，可保证数据完整性
      */
     public function getResult($event_id) {
+        $data   = array();
         $data   = array(
             'app_id'    => $this->app_id,
             'event_id'  => $event_id
@@ -142,20 +161,27 @@ class secken {
     }
 
     /**
-     * 一键认证
-     * @param string $action_type 请求用户的操作
-     * @param string $uid 用户ID
-     * @param string $user_ip 用户IP地址(可选)
-     * @param string $username 第三方用户名(可选)
+     * 实时验证
+     * @param
+     * action_type   Int     操作类型(1:登录验证，2:请求验证，3:交易验证，4:其它验证)
+     * auth_type     Int     验证类型（1: 点击确认按钮 2: 使用手势密码 3: 人脸验证 4: 声音验证）
+     * callback      String  回调地址，当用户同意或拒绝验证的后续处理（可选）
+     * uid           String  用户ID
+     * user_ip       String  用户Ip地址(可选)
+     * username      String  第三方用户名，需要URL编码（可选）
+     * signature     String  签名，用于确保客户端提交数据的完整性
      * @return array
-     * code     成功、错误码
-     * message  错误信息
-     * event_id 事件id
+     * status        Int     状态码
+     * description   String  状态码对应描述信息
+     * event_id      String  事件ID,可调用event_result API来获取扫描结果,如果设置了callback，则无法获取扫描结果
+     * signature     String  签名，可保证数据完整性
      */
     public function realtimeAuth($uid, $action_type = 1, $auth_type=1, $callback='', $user_ip = '', $username = '') {
+        $data   = array();
         $data   = array(
-            'action_type'   => $action_type,
+            'action_type'   => intval($action_type),
             'app_id'        => $this->app_id,
+            'auth_type'     => intval($auth_type),
             'uid'           => $uid
         );
 
@@ -174,17 +200,21 @@ class secken {
 
     /**
      * 动态码验证
-     * @param string $uid 用户ID
-     * @param string $dynamic_code 6位数字
+     * @param
+     * uid            String  用户ID
+     * dynamic_code   Int     6位动态码
+     * signature      String  签名，用于确保客户端提交数据的完整性
      * @return array
-     * code    成功、错误码
-     * message 错误信息
+     * status         Int     状态码
+     * description    String  状态码对应描述信息
+     * signature      String  签名，可保证数据完整性
      */
     public function offlineAuth($uid, $dynamic_code) {
+        $data   = array();
         $data   = array(
             'appid'         => $this->app_id,
             'uid'           => $uid,
-            'dynamic_code'  => $dynamic_code
+            'dynamic_code'  => intval($dynamic_code)
         );
 
         $data['signature'] = $this->getSignature($data);
@@ -198,33 +228,39 @@ class secken {
 
     /**
      * 洋葱网页授权
-     * @param string $callback 回调登陆地址
-     * @return string 授权页url
+     * @param
+     * auth_id    String  授权ID
+     * timestamp  Int     发起请求时的时间戳
+     * callback   String  回调地址
+     * signature  String  签名，用于确保客户端提交数据的完整性
+     * @return
+     * uid        String  洋葱用户ID
+     * timestamp  Int     服务器返回数据时的时间戳
+     * signature  String  签名，可保证数据完整性
      */
     public function getAuthPage($callback) {
-        $_time  = time();
+
+        $data   = array();
         $data   = array(
             'auth_id'       => $this->auth_id,
-            'timestamp'     => $_time,
+            'timestamp'     => time(),
             'callback'      => urlencode($callback)
         );
 
         $data['signature'] = $this->getSignature($data);
 
-        unset($_time);
-
-        $url    = self::AUTH_PAGE;
-        $ret    = $this->request($url);
+        $ret   = $this->request(self::AUTH_PAGE);
 
         return $this->prettyRet($ret);
     }
 
     /**
      * 生成签名
-     * @param array $params 要签名的参数
-     * @return string 签名的MD5串
+     * @param
+     * params  Array  要签名的参数
+     * @return String 签名的MD5串
      */
-    public function getSignature($params) {
+    private function getSignature($params) {
         ksort($params);
         $str = '';
 
@@ -251,17 +287,21 @@ class secken {
         return $this->code;
     }
 
+    /**
+     * 处理返回信息
+     * @return Mix
+     */
     private function prettyRet($ret) {
         if ( is_string($ret) ) {
             return $ret;
         }
 
-        $this->code     = isset($ret['status'])? $ret['status'] : false;
+        $this->code = isset($ret['status'])? $ret['status'] : false;
 
-        if ( isset($ret['description']) ) {
-            $this->message  = $ret['description'];
-        } else {
-            $this->message  = isset($this->errorCode[$this->code])? $this->errorCode[$this->code] : 'UNKNOW ERROR';
+        if(isset($this->errorCode[$this->code])){
+            $this->message = $this->errorCode[$this->code];
+        }else{
+            $this->message = isset($ret['description']) ? $ret['description'] : 'UNKNOW ERROR';
         }
 
         return $ret;
@@ -269,8 +309,11 @@ class secken {
 
 
     /**
-     * gen the URL
-     *
+     * 生成请求连接，用于发起GET请求
+     * @param
+     * action_url    String    请求api地址
+     * data          Array     请求参数
+     * @return String
      **/
     private function gen_get_url($action_url, $data) {
         return self::BASE_URL . $action_url. '?' . http_build_query($data);
@@ -278,12 +321,12 @@ class secken {
 
 
     /**
-     * send the http request to yangcong API server
-     *
-     * @param String $url: API 的 URL 地址
-     * @param String $method: HTTP方法，POST | GET
-     * @param Array $data: 发送的参数，如果 method 为 GET，留空即可
-     *
+     * 发送HTTP请求到洋葱服务器
+     * @param
+     * url      String  API 的 URL 地址
+     * method   Sting   HTTP方法，POST | GET
+     * data     Array   发送的参数，如果 method 为 GET，留空即可
+     * @return  Mix
      **/
     private function request($url, $method = 'GET', $data = array()) {
         if ( !function_exists('curl_init') ) {
@@ -301,7 +344,7 @@ class secken {
         curl_setopt($ci, CURLOPT_HEADER, FALSE);
         curl_setopt($ci, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ci, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, false); 
+        curl_setopt($ci, CURLOPT_SSL_VERIFYPEER, false);
 
         if ( $method == 'POST' ) {
             curl_setopt($ci, CURLOPT_POST, TRUE);

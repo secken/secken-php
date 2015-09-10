@@ -1,0 +1,71 @@
+<html>
+<head>
+</head>
+<body>
+<p>
+    <label>实例: </label>
+    <select name="ac" id="ac">
+        <option value="qrcode_for_auth" selected="selected">用户认证</option>
+    </select>
+    <label>验证方式: </label>
+    <select name="auth_type" id="auth_type">
+        <option value="1" selected="selected">点击按钮确认</option>
+    </select>
+    <input type="button" name="sub" id="sub" value="获取二维码图片" onclick="javascript:change_ac();"/>
+</p>
+<hr/>
+<p id="qrcode" style="text-align: center;"></p>
+
+<script type="text/javascript" src="./js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript">
+    var event_id = '';
+    function change_ac(){
+        var ac = $('#ac').val();
+        var auth_type = $('#auth_type').val();
+
+        $.get('controller/ac.php',{'ac':ac,'auth_type':auth_type}, function(resp){
+            var r = eval(resp);
+            if(r.status == 200){
+                var h = '';
+                    h += '<img src="'+r.qrcode_url+'" with="300px" height="300px"/>';
+                    h += '<p id="tip">请使用洋葱APP扫一扫</p>'
+                    $('#qrcode').html(h);
+
+                    event_id = r.event_id;
+                    //开始调取获取事件结果接口
+                    get_event_result();
+            }else{
+                alert(r.description);
+            }
+        },'json');
+    }
+
+    function get_event_result(){
+
+        $.get('controller/ac.php',{'ac':'event_result', 'event_id':event_id},function(resp){
+            var r = eval(resp);
+
+            $('#tip').html(r.description);
+            if(r.status == 200){
+                //开始绑定
+                bind_user(r.uid);
+                return;
+            }
+
+            setTimeout('get_event_result()', 3000);
+
+        },'json')
+    }
+
+    function bind_user(yangcong_uid){
+        $.post('controller/check_bind.php', {'yangcong_uid':yangcong_uid}, function(resp){
+            if(resp == 1){
+                location.href = './myspace.html';
+            }else{
+                location.href = './bind.html';
+            }
+        });
+    }
+</script>
+</body>
+</html>

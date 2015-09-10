@@ -1,0 +1,56 @@
+<html>
+<head>
+    <style type="text/css">
+        .bg{
+            background: #f2f2f2!important;
+        }
+        .main{
+            width:700px;
+            height:348px;
+            text-align:center;
+            display: block;
+            margin: 100 auto;
+            border:1px solid #f0f0f0;
+            background: #fff;
+            padding-top: 10px;
+        }
+
+        p {
+            display: block;
+            width:400px;
+            height: 60px;
+        }
+
+        p label{
+            width:100px;
+            height: 60px;
+        }
+
+        input{
+            width:300px;
+            height: 40px;
+            float: right;
+        }
+    </style>
+</head>
+<body class="bg">
+<div class="main">
+<h3 style="text-align:left;padding-left:20px">绑定DEMO网页</h3>
+<hr/>
+<form action="controller/bind.php" method="post">
+<p>
+    <label>用户名:  </label>
+    <input type="text" name="username"/>
+</p>
+<p>
+    <label>密码:  </label>
+    <input type="password" name="pwd" />
+</p>
+<p>
+    <input type="hidden" name="bind_form" value="1"/>
+    <input type="submit" name="sub" value="绑定" style="height:30px"/>
+</p>
+</form>
+</div>
+</body>
+</html>
