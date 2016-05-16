@@ -212,7 +212,7 @@ class secken {
     public function offlineAuth($uid, $dynamic_code) {
         $data   = array();
         $data   = array(
-            'appid'         => $this->app_id,
+            'app_id'         => $this->app_id,
             'uid'           => $uid,
             'dynamic_code'  => intval($dynamic_code)
         );
